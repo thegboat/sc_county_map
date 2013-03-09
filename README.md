@@ -7,8 +7,14 @@ Dependencies
 * jquery ui
 * [raphael]
 
-Simple Usage
+Features
 -
+
+* Information display
+* Radio button like form behavior
+* Checkbox form behavior
+* Configurable colors
+* Options can be set using HTML attributes
 
 ####HTML
 
