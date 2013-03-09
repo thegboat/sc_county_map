@@ -47,7 +47,6 @@ $.widget("ui.sc_county_map", {
     }
     this.pen = '';
     this.paper = Raphael(this.element[0], this._scaled(865), this._scaled(765));
-    this.header_text = this.paper.text(this._scaled(432), this._scaled(40), '').attr({'font-size' : this._scaled(32)});
     this.highlighted = null;
     this.translation_table = this.options['translation-table'];
     if(!this.translation_table && this._translation_table){
@@ -56,11 +55,13 @@ $.widget("ui.sc_county_map", {
     this.translation_table = this.translation_table || {};
     if(this.core) this.core.remove();
     this.core = this.paper.set();
-    this.members = this._parse_collection(this.options.members);
-    this.selected = this._parse_collection(this.options.selected);
+    this._parse_collection('members');
+    var to_hlight = this._parse_collection('selected');
     this.entities = this._base_entities(true);
-
+    this.highlighted = this.entities[to_hlight];
     this._draw_counties();
+    var text = this.highlighted ? this.highlighted.title : ''
+    this.header_text = this.paper.text(this._scaled(432), this._scaled(40), text).attr({'font-size' : this._scaled(32)});
     this.core.toFront();
     this.paper.safari();
   },
@@ -99,23 +100,30 @@ $.widget("ui.sc_county_map", {
     this.core.push(r);
   },
 
-  _parse_collection : function(options_data){
-    if(!options_data) return {};
-    var rtn = {}, entities = this._base_entities();
-    options_data = options_data.split(/[^A-Za-z0-9]/);
-    for(i in options_data){
-      var member_id =  options_data[i], val = null;
-      if(entities[member_id]) val = member_id;
-      val = val || this.translation_table[member_id];
-      if(val) rtn[val] = true;
-    };
-    return rtn;
+  _parse_collection : function(key){
+    var options_data = this.options[key], rtn = {}, first = null
+    if(options_data){
+      var entities = this._base_entities();
+      options_data = options_data.split(/[^A-Za-z0-9]/);
+      for(i in options_data){
+        var member_id =  options_data[i], val = null;
+        if(entities[member_id]) val = member_id;
+        val = val || this.translation_table[member_id];
+        if(val){
+          rtn[val] = true;
+          if(!first) first = val
+          if(key == 'selected' && !this.multiselect) break;
+        }
+      }
+    }
+    this[key] = rtn;
+    return first;
   },
 
   _add_events : function(entity){
     var map = this;
     var mover = (function(){
-      if(map.highlighted != entity){
+      if(!map._is_selected(entity)){
         var color = map._is_member(entity) ? map.options.memberhover : map.options.hover;
         entity.shape.animate({fill: color, stroke: map.options.edge}, 200);
         map.header_text.attr({text : entity.title});
@@ -123,7 +131,7 @@ $.widget("ui.sc_county_map", {
       }
     });
     var mout = (function(){
-      if(map.highlighted != entity){
+      if(!map._is_selected(entity)){
         entity.shape.animate({fill: entity.color, stroke: map.options.edge}, 200);
         text = map.highlighted ? map.highlighted.title : '';
         map.header_text.attr({text : text});
@@ -181,7 +189,7 @@ $.widget("ui.sc_county_map", {
     switch(this.options.clickable.toLowerCase()){
       case "members" : return this._is_member(entity);
       case "nonmembers" : return !this._is_member(entity);
-      default : true;
+      default : return true;
     }
   },
 
