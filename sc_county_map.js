@@ -18,7 +18,7 @@ $.widget("ui.sc_county_map", {
   options: {
     scale: 1.0,
     members: '',
-    'default' : "#F8F8F8",
+    'fill' : "#F8F8F8",
     highlighted  : "#4C7ABF",
     member    : "#B7DFE5",
     hover     : "#AEAEAE",
@@ -200,7 +200,7 @@ $.widget("ui.sc_county_map", {
 
   _remove_member : function(entity){
     this.members[entity.name] = false;
-    entity.color = this.options.default;
+    entity.color = this.options.fill;
   },
 
   _add_selected : function(entity){
@@ -323,7 +323,7 @@ $.widget("ui.sc_county_map", {
           }
         }
         entity.shape = this.paper.set();
-        entity.color = this._is_member(entity) ? this.options.member : this.options.default;
+        entity.color = this._is_member(entity) ? this.options.member : this.options.fill;
       }
     }
     return entities;
