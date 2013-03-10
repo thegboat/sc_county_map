@@ -49,7 +49,7 @@ More complex example
       });
     });
 
-![ScreenShot](https://rawgithub.com/thegboat/sc_county_map/master/screen_shot.png)
+![ScreenShot](https://rawgithub.com/thegboat/examples/master/sc_county_map/screen_shot.png)
 
 HTML attributes instead of options
 -
