@@ -76,6 +76,10 @@ Map Options
 
  Specifies how many counties can be selected. true and false are valid values
 
+ **font** defaults to 'News Cycle'
+
+ Font for county labels. News Cycle is packaged.  See [Cufon] for how to create new fonts.
+
 Group Options
 -
 **Groups allow for dividing the map into colors and specifying whether the group is clickable.**
@@ -150,3 +154,4 @@ would be used.
 
 [raphael]: http://raphaeljs.com/
 [see a live demo]: http://rawgithub.com/thegboat/examples/master/sc_county_map/example.html
+[Cufon]: http://cufon.shoqolate.com/generate/
