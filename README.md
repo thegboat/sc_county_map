@@ -1,5 +1,7 @@
 # SC County Map : interactive jquery ui map widget
 
+[see a live demo]
+
 Dependencies
 -
 
@@ -147,3 +149,4 @@ would be used.
 
 
 [raphael]: http://raphaeljs.com/
+[see a live demo]: http://rawgithub.com/thegboat/examples/master/sc_county_map/example.html
