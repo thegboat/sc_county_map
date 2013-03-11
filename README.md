@@ -158,7 +158,20 @@ or
 
 `<div id="county_map" data-group-best="greenwood" data-color-best="red,blue" data-clickable="best"/>`
 
-would create the 'best' group with a default color of 'red' and hover color of 'blue'. The 'best' group is clickable 
+would create the 'best' group with a default color of 'red' and hover color of 'blue'. The 'best' group is clickable
+
+Painting Counties
+-
+
+Calling the paint method will paint the supplied counties.
+
+`$("#county_map").sc_county_map('paint', 'union,york', 'blue')
+
+All painting is undone by using the method
+
+`$("#county_map").sc_county_map('unpaint', 'union,york')
+
+Calling upaint with no arguments unpaints all previously painted counties.  When an event is triggered, all previously painted counties are unpainted.
 
 
 
