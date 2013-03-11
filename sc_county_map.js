@@ -304,7 +304,7 @@ $.widget("ui.sc_county_map", {
 
   _remove_selected : function(entity, hovering){
     if(!entity) return false
-    delete this.groups.selected[entity.name];
+    this.groups.selected[entity.name] = false;
     var color = this._get_color(entity,hovering)
     this._change_color(entity, color)
     if(this._get_form_input(entity)) this._get_form_input(entity).prop('checked', false);
@@ -344,7 +344,9 @@ $.widget("ui.sc_county_map", {
     var shape_ids = shapes.split(',')
     for(var i in shape_ids){
       var shape_id = shape_ids[i].trim()
+      shape_id = this.translation_table[shape_id] || shape_id
       var entity = this.entities[shape_id]
+      entity = entity 
       if(!entity) continue;
       this.painted[shape_id] = true
       this._change_color(entity, color)
@@ -357,7 +359,9 @@ $.widget("ui.sc_county_map", {
     if(shapes){
       var shape_ids = shapes.split(',');
       for(var i in shape_ids){
-        this._unpaint_one(shape_ids[i].trim());
+        var shape_id = shape_ids[i].trim()
+        shape_id = this.translation_table[shape_id] || shape_id
+        this._unpaint_one(shape_id);
       }
     }else{
       for(var shape_id in this.painted){
