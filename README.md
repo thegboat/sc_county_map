@@ -92,32 +92,25 @@ Group Options
 
  Add counties to the selected group. Use comma separated county names or translation table ids
 
- **clickable** defaults to members
+ **clickable** defaults to 'members'
 
- 'members', 'nonmembers', and 'all' are valid values.
+any group or groups separated by commas is valid. Use a '!' for group negation (i.e. '!members' would be not in members group). Use 'all' to denote just that.
 
 Color Options
 -
+**Comma separated CSS valid colors. The second value is color for hover.  If no second value is supplied hover will be ignored.
 
- **fill** defaults to #F8F8F8
+ **fill** defaults to "#F8F8F8, #AEAEAE"
 
  Default color for counties.  The color used for counties not in a group.
 
- **highlighted** defaults to #4C7ABF
+ **highlighted** defaults to '#4C7ABF'
 
- Color used for selected counties.
+ Color used for selected counties. Even if second value is supplied selection does not respond to hover.
 
- **member** defaults to #B7DFE5
+ **member** defaults to '#B7DFE5,#4CAEBF'
 
- Color used for member counties.
-
- **hover** defaults to #AEAEAE
-
- Default color for hovering.
-
- **memberhover** defaults to #4CAEBF
-
- Color for member hovering.
+ Colors used for member counties.
 
  **edge** defaults to #000
 
@@ -125,7 +118,6 @@ Color Options
 
 Selector Options
 -
-**The selectors are used at creation time and the element is stored with the county.  The DOM tranversal is done only once therefore the selection is not dynamic.**
 
 **formselector** defaults to null
 
@@ -149,7 +141,26 @@ will be used to find the html to replace with.  If a translation table is provid
 
 `#county_map_wrapper .county_map_info_greenville, #county_map_wrapper .county_map_info_23`
 
-would be used.  
+would be used.
+
+**preselect** defaults to true
+
+When set to true DOM tranversal is done only once and the result is stored on creation. When false the DOM is tranverse on every operation.  Though you would unlikely notice the performance difference the former is optimal.  Set to false only when necessary.
+
+Custom Group Options
+-
+
+Add new groups by adding group and color prefixes.  The options
+
+`{'group-best' : 'greenwood', 'color-best' : 'red,blue', clickable: 'best'}`
+
+or
+
+`<div id="county_map" data-group-best="greenwood" data-color-best="red,blue" data-clickable="best"/>`
+
+would create the 'best' group with a default color of 'red' and hover color of 'blue'. The 'best' group is clickable 
+
+
 
 
 [raphael]: http://raphaeljs.com/

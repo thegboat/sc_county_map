@@ -2,7 +2,7 @@
  * jQuery UI County Map
  *
  * Author: Grady Griffin
- * Version: 0.1.0
+ * Version: 0.2.0
  * 
  * https://github.com/thegboat/sc_county_map
  * 
@@ -18,19 +18,18 @@ $.widget("ui.sc_county_map", {
   options: {
     scale: 1.0,
     members: '',
-    'fill' : "#F8F8F8",
+    'fill' : "#F8F8F8,#AEAEAE",
     highlighted  : "#4C7ABF",
-    member    : "#B7DFE5",
-    hover     : "#AEAEAE",
-    memberhover : "#4CAEBF",
+    member    : "#B7DFE5,#4CAEBF",
     edge : "#000",
     selected : null,
     font : "News Cycle",
     'translation-table' : null,
-    clickable :  'members', // members, nonmembers, all
+    clickable :  'members',
     multiselect : false, // single, multiple
     formselector : null, 
-    infoselector : null
+    infoselector : null,
+    preselect : true
   },
   /*app specific*/
   //used to map a server side id to entity name
@@ -39,28 +38,30 @@ $.widget("ui.sc_county_map", {
   },
 
   _create : function(){
-    this.options = $.extend(this.options, this.element.data());
-    this.info_selector = this.options.infoselector;
-    if(this.info_selector){
-      var info_div = $(this.info_selector);
-      this.info_div = info_div;
-    }
+    this.options = $.extend(this.element.data(),this.options);
+    this._info_div(true);
     this.pen = '';
+
     this.paper = Raphael(this.element[0], this._scaled(865), this._scaled(765));
+    if(this.core) this.core.remove();
+    this.core = this.paper.set();
     this.header_text = this.paper.text(this._scaled(432), this._scaled(40), '').attr({'font-size' : this._scaled(32)});
+
     this.translation_table = this.options['translation-table'];
     if(!this.translation_table && this._translation_table){
       this.translation_table = this._translation_table();
     }
     this.translation_table = this.translation_table || {};
-    if(this.core) this.core.remove();
-    this.core = this.paper.set();
-    this._parse_collection('members');
-    var to_hlight = this._parse_collection('selected');
+
+    this._set_clickable();
+    this._make_groups();
+    this._set_colors();
+    var to_hlight = this._parse_group('selected');
     this.entities = this._base_entities(true);
     this.highlighted = null;
     this._clicked(this.entities[to_hlight])
     this._draw_counties();
+
     this.core.toFront();
     this.paper.safari();
   },
@@ -99,39 +100,19 @@ $.widget("ui.sc_county_map", {
     this.core.push(r);
   },
 
-  _parse_collection : function(key){
-    var options_data = this.options[key], rtn = {}, first = null
-    if(options_data){
-      var entities = this._base_entities();
-      options_data = options_data.split(/[^A-Za-z0-9]/);
-      for(i in options_data){
-        var member_id =  options_data[i], val = null;
-        if(entities[member_id]) val = member_id;
-        val = val || this.translation_table[member_id];
-        if(val){
-          rtn[val] = true;
-          if(!first) first = val
-          if(key == 'selected' && !this.multiselect) break;
-        }
-      }
-    }
-    this[key] = rtn;
-    return first;
-  },
-
   _add_events : function(entity){
     var map = this;
     var mover = (function(){
-      if(!map._is_selected(entity)){
-        var color = map._is_member(entity) ? map.options.memberhover : map.options.hover;
-        entity.shape.animate({fill: color, stroke: map.options.edge}, 200);
+      if(!map._is_in_group('selected',entity)){
+        var color = map._get_color(entity, true)
+        entity.shape.animate({fill: color, stroke: map.colors.edge}, 200);
         map.header_text.attr({text : entity.title});
         map.paper.safari();
       }
     });
     var mout = (function(){
-      if(!map._is_selected(entity)){
-        entity.shape.animate({fill: entity.color, stroke: map.options.edge}, 200);
+      if(!map._is_in_group('selected',entity)){
+        entity.shape.animate({fill: map._get_color(entity), stroke: map.colors.edge}, 200);
         text = map.highlighted ? map.highlighted.title : '';
         map.header_text.attr({text : text});
         map.paper.safari();
@@ -148,20 +129,92 @@ $.widget("ui.sc_county_map", {
     }
   },
 
-  _is_member : function(entity){
-    return !!this.members[entity.name];
+  _parse_group : function(key){
+    var options_data = this.options[key]
+    var group_name = key.replace(/^group-/,'')
+    var rtn = {}, first = null
+    if(options_data){
+      var entities = this._base_entities();
+      options_data = options_data.split(/[^A-Za-z0-9]/);
+      for(i in options_data){
+        var member_id =  options_data[i], val = null;
+        if(entities[member_id]) val = member_id;
+        val = val || this.translation_table[member_id];
+        if(val){
+          rtn[val] = true;
+          if(!first) first = val
+          if(key == 'selected' && !this.multiselect) break;
+        }
+      }
+    }
+    this.groups[group_name] = rtn;
+    return first;
   },
 
-  _is_selected : function(entity){
-    return !!this.selected[entity.name];
+  _set_clickable : function(){
+    this.clickable = this.options.clickable.toLowerCase().split(/[^!A-Za-z0-9]/);
+    if(this.clickable.indexOf('all') > -1) this.clickable = null;
+  },
+
+  _set_colors : function(){
+    var hlight = this.options.highlighted.split(',')
+    this.colors = {
+      fill          : this.options.fill.split(','),
+      highlighted   : [hlight[0], hlight[0]],
+      members       : this.options.member.split(','),
+      edge          : this.options.edge,
+    }
+    for(var group_name in this.groups){
+      if(this.options["color-"+group_name]){
+        this.colors[group_name] = this.options["color-"+group_name].split(',')
+      }
+      else{
+        this.colors[group_name] = this.colors[group_name] || this.colors.fill
+      }
+    }
+  },
+
+  _is_in_group : function(group_name, entity){
+    if(!this.groups[group_name]) return false
+    return !!this.groups[group_name][entity.name]
+  },
+
+  _get_group : function(entity){
+    if(this._is_in_group('selected', entity)) return 'highlighted'
+    if(this._is_in_group('members', entity)) return 'members'
+    for(var group_name in this.groups){
+      if(this.groups[group_name][entity.name]) return group_name
+    }
+    return null
   },
 
   _is_clickable : function(entity){
-    switch(this.options.clickable.toLowerCase()){
-      case "members" : return this._is_member(entity);
-      case "nonmembers" : return !this._is_member(entity);
-      default : return true;
+    if(!this.clickable) return true
+    for(var i in this.clickable){
+      var group_name = this.clickable[i].replace(/^!/,'');
+      if(/^!/.test(this.clickable[i]) ^ this._is_in_group(group_name, entity)){
+        return true;
+      }
     }
+    return false
+  },
+
+  _make_groups : function(){
+    this.groups = {members : {}}
+    for(var group_name in this.options){
+      if(/^group-[A-Za-z0-9]/.test(group_name) || group_name == 'members'){
+        this._parse_group(group_name)
+      }
+    }
+  },
+
+  _get_color : function(entity, hover){
+    group_name = this._get_group(entity)
+    if(group_name){
+      var l = this.colors[group_name].length
+      return (hover ? this.colors[group_name][l-1] : this.colors[group_name][0])
+    }
+    return (hover ? this.colors.fill[1] : this.colors.fill[0])
   },
 
   _clicked : function(entity){
@@ -182,9 +235,11 @@ $.widget("ui.sc_county_map", {
     if(this.highlighted){
       this.header_text.attr({text : this.highlighted.title});
     }
+    this._info_div();
     if(this.info_div){
-      if(entity.info_div){
-        this.info_div.html(entity.info_div.html());
+      var info_div = this._get_info_div(entity)
+      if(info_div){
+        this.info_div.html(info_div.html());
       }
       else{
         this.info_div.empty();
@@ -193,26 +248,69 @@ $.widget("ui.sc_county_map", {
     this.paper.safari();
   },
 
-  _add_selected : function(entity){
-    this.selected[entity.name] = true;
-    if(entity.shape.attr('fill') != this.options.highlighted){
-      entity.shape.attr({fill: this.options.highlighted, stroke: this.options.edge});
+  _info_div : function(init){
+    if(!this.options.infoselector) return null
+    if(init || !this.preselect){
+      var info_div = $(this.options.infoselector);
+      this.info_div = info_div.length ? info_div : null;
     }
-    if(entity.form_input) entity.form_input.prop('checked', true);
+  },
+
+  _get_info_div : function(entity, init){
+    if(!this.options.infoselector) return null;
+    if(init || !entity.info_selector){
+      var sel = this.options.infoselector + "_" + entity.name;
+      if(entity.id) sel += ", " + this.options.infoselector + "_" + entity.id;
+      entity.info_selector = sel;
+    }
+    if(init || !this.preselect){
+      var info_div = $(entity.info_selector);
+      if(info_div.length){
+        if(this.preselect) entity.info_div = info_div;
+        return info_div;
+      }
+    }else{
+      return entity.info_div;
+    }
+    return null;
+  },
+
+  _get_form_input : function(entity, init){
+    if(!this.options.formselector) return null;
+    if(!entity.form_selector){
+      var sel = this.options.formselector.replace(/\|shape_id\|/, entity.name);
+      if(entity.id) sel += ", " + this.options.formselector.replace(/\|shape_id\|/, entity.id);
+      entity.form_selector = sel;
+    }
+    if(init || !this.preselect){
+      var input = $(entity.form_selector);
+      if(input.length){
+        if(this.preselect) entity.form_input = input;
+        return input;
+      }
+    }else{
+      return entity.form_input;
+    }
+  },
+
+  _add_selected : function(entity){
+    this.groups.selected[entity.name] = true;
+    this._change_color(entity)
+    if(this._get_form_input(entity)) this._get_form_input(entity).prop('checked', true);
   },
 
   _remove_selected : function(entity, hovering){
     if(!entity) return false
-    this.selected[entity.name] = false;
-    if(hovering){
-      color = this._is_member(entity) ? this.options.memberhover : this.options.hover
-    }else{
-      color = entity.color
-    }
+    this.groups.selected[entity.name] = false;
+    this._change_color(entity, hovering)
+    if(this._get_form_input(entity)) this._get_form_input(entity).prop('checked', false);
+  },
+
+  _change_color : function(entity, hovering){
+    var color = this._get_color(entity,hovering)
     if(entity.shape.attr('fill') != color){
-      entity.shape.attr({fill: color, stroke: this.options.edge});
+      entity.shape.attr({fill: color, stroke: this.colors.edge});
     }
-    if(entity.form_input) entity.form_input.prop('checked', false);
   },
 
   _stroke_path : function(path,reverse){
@@ -226,8 +324,8 @@ $.widget("ui.sc_county_map", {
   _write_shape : function(entity, attrs){
     if(!this.pen || this.pen == 'M') return false ;
     this.pen += 'Z';
-    color = this._is_selected(entity) ? this.options.highlighted : entity.color
-    attrs = attrs || {fill: color, stroke: this.options.edge, "stroke-width": 1, "stroke-linejoin": "round"};
+    color = this._get_color(entity)
+    attrs = attrs || {fill: color, stroke: this.colors.edge, "stroke-width": 1, "stroke-linejoin": "round"};
     entity.shape.push(this.paper.path(this.pen).attr(attrs));
     this.pen = '';
     return true;
@@ -294,26 +392,9 @@ $.widget("ui.sc_county_map", {
       for(var entity_name in entities){
         var entity = entities[entity_name];
         var id = entity.id ? entity.id : entity.name;
-        if(this.info_selector){
-          var sel = this.info_selector + "_" + entity.name;
-          if(entity.id) sel += ", " + this.info_selector + "_" + entity.id;
-          var info_div = $(sel);
-          if(info_div.length){
-            entity.info_div = info_div;
-            entity.info_selector = sel;
-          }
-        }
-        if(this.options.formselector){
-          var sel = this.options.formselector.replace(/\|shape_id\|/, entity.name);
-          if(entity.id) sel += ", " + this.options.formselector.replace(/\|shape_id\|/, entity.id);
-          var input = $(sel);
-          if(input.length){
-            entity.form_input = input;
-            entity.form_selector = sel;
-          }
-        }
+        this._get_form_input(entity, true)
+        this._get_info_div(entity, true)
         entity.shape = this.paper.set();
-        entity.color = this._is_member(entity) ? this.options.member : this.options.fill;
       }
     }
     return entities;
