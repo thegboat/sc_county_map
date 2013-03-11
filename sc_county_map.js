@@ -38,7 +38,7 @@ $.widget("ui.sc_county_map", {
   },
 
   _create : function(){
-    this.options = $.extend(this.element.data(),this.options);
+    this.options = $.extend(this.options,this.element.data());
     this._info_div(true);
     this.pen = '';
 
@@ -58,8 +58,7 @@ $.widget("ui.sc_county_map", {
     this._set_colors();
     var to_hlight = this._parse_group('selected');
     this.entities = this._base_entities(true);
-    this.highlighted = null;
-    this._clicked(this.entities[to_hlight])
+    if(to_hlight) this._clicked(this.entities[to_hlight])
     this._draw_counties();
 
     this.core.toFront();
