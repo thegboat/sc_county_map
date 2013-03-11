@@ -98,7 +98,7 @@ any group or groups separated by commas is valid. Use a '!' for group negation (
 
 Color Options
 -
-**Comma separated CSS valid colors. The second value is color for hover.  If no second value is supplied hover will be ignored.
+**Comma separated CSS valid colors. The second value is color for hover.  If no second value is supplied hover will be ignored.**
 
  **fill** defaults to "#F8F8F8, #AEAEAE"
 
