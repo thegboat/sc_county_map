@@ -1,3 +1,7 @@
+#### 0.3.0 - 3/11/13 Grady Griffin
+
+* adding public paint and unpaint methods
+
 #### 0.2.1 - 3/11/13 Grady Griffin
 
 * remove floating point coordinates in favor of integers. reduced file size 9% without any noticeable resolution loss.
