@@ -160,18 +160,26 @@ or
 
 would create the 'best' group with a default color of 'red' and hover color of 'blue'. The 'best' group is clickable
 
-Painting Counties
+Public Methods
 -
 
-Calling the paint method will paint the supplied counties.
+**paint** paint(counties, color)
 
-`$("#county_map").sc_county_map('paint', 'union,york', 'blue')
+Calling the paint method will paint the supplied counties. When an event is triggered, all previously painted counties are unpainted.
+
+`$("#county_map").sc_county_map('paint', 'union,york', 'blue')`
+
+**unpaint** unpaint([counties])
 
 All painting is undone by using the method
 
-`$("#county_map").sc_county_map('unpaint', 'union,york')
+`$("#county_map").sc_county_map('unpaint', 'union,york')`
 
-Calling upaint with no arguments unpaints all previously painted counties.  When an event is triggered, all previously painted counties are unpainted.
+Calling upaint with no arguments unpaints all previously painted counties.
+
+**label** label(text)
+
+Set the header text.  When an event is triggered, the header text is reset.
 
 
 

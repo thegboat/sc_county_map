@@ -31,8 +31,43 @@ $.widget("ui.sc_county_map", {
     infoselector : null,
     preselect : true
   },
-  /*app specific*/
-  //used to map a server side id to entity name
+
+  paint : function(shapes, color){
+    this.painted = this.painted || {}
+    var shape_ids = String(shapes).split(',')
+    for(var i in shape_ids){
+      var shape_id = shape_ids[i].trim()
+      shape_id = this.translation_table[shape_id] || shape_id
+      var entity = this.entities[shape_id]
+      entity = entity 
+      if(!entity) continue;
+      this.painted[shape_id] = true
+      this._change_color(entity, color)
+    }
+  },
+
+  unpaint : function(shapes){
+    if(!this.painted) return false;
+    var shape_ids;
+    if(shapes){
+      var shape_ids = String(shapes).split(',');
+      for(var i in shape_ids){
+        var shape_id = shape_ids[i].trim()
+        shape_id = this.translation_table[shape_id] || shape_id
+        this._unpaint_one(shape_id);
+      }
+    }else{
+      for(var shape_id in this.painted){
+        this._unpaint_one(shape_id);
+      }
+    }
+  },
+
+  label : function(text){
+    text = String(text || '')
+    this.header_text.attr({text : text})
+  },
+
   _translation_table : function(){
     return {"1":"abbeville","2":"aiken","3":"allendale","4":"anderson","5":"bamberg","6":"barnwell","7":"beaufort","8":"berkeley","9":"calhoun","10":"charleston","11":"cherokee","12":"chester","13":"chesterfield","14":"clarendon","15":"colleton","16":"darlington","17":"dillon","18":"dorchester","19":"edgefield","20":"fairfield","21":"florence","22":"georgetown","23":"greenville","24":"greenwood","25":"hampton","26":"horry","27":"jasper","28":"kershaw","29":"lancaster","30":"laurens","31":"lee","32":"lexington","34":"marion","35":"marlboro","33":"mccormick","36":"newberry","37":"oconee","38":"orangeburg","39":"pickens","40":"richland","41":"saluda","42":"spartanburg","43":"sumter","44":"union","45":"williamsburg","46":"york"};
   },
@@ -59,20 +94,20 @@ $.widget("ui.sc_county_map", {
     var to_hlight = this._parse_group('selected');
     this.entities = this._base_entities(true);
     if(to_hlight) this._clicked(this.entities[to_hlight])
-    this._draw_counties();
+    this._draw_shapes();
 
     this.core.toFront();
     this.paper.safari();
   },
 
-  _draw_counties : function(){
+  _draw_shapes : function(){
     var entity, paths = this._base_paths();
     for(var entity_name in this.entities){
-      this._draw_county(entity_name, paths);
+      this._draw_shape(entity_name, paths);
     }
   },
 
-  _draw_county : function(entity_name, paths){
+  _draw_shape : function(entity_name, paths){
     paths = paths || this._base_paths();
     var entity = this.entities[entity_name.trim()];
     this.pen = '';
@@ -337,37 +372,6 @@ $.widget("ui.sc_county_map", {
 
   _scaled : function(val){
     return val * this.options.scale;
-  },
-
-  paint : function(shapes, color){
-    this.painted = this.painted || {}
-    var shape_ids = shapes.split(',')
-    for(var i in shape_ids){
-      var shape_id = shape_ids[i].trim()
-      shape_id = this.translation_table[shape_id] || shape_id
-      var entity = this.entities[shape_id]
-      entity = entity 
-      if(!entity) continue;
-      this.painted[shape_id] = true
-      this._change_color(entity, color)
-    }
-  },
-
-  unpaint : function(shapes){
-    if(!this.painted) return false;
-    var shape_ids;
-    if(shapes){
-      var shape_ids = shapes.split(',');
-      for(var i in shape_ids){
-        var shape_id = shape_ids[i].trim()
-        shape_id = this.translation_table[shape_id] || shape_id
-        this._unpaint_one(shape_id);
-      }
-    }else{
-      for(var shape_id in this.painted){
-        this._unpaint_one(shape_id);
-      }
-    }
   },
 
   _unpaint_one : function(shape_id){

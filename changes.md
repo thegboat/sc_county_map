@@ -1,6 +1,6 @@
 #### 0.3.0 - 3/11/13 Grady Griffin
 
-* adding public paint and unpaint methods
+* adding public paint, unpaint, and label methods
 
 #### 0.2.1 - 3/11/13 Grady Griffin
 
