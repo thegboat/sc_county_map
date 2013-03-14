@@ -1,3 +1,7 @@
+#### 0.3.0 - 3/14/13 Grady Griffin
+
+* adding public add_to and remove_from methods
+
 #### 0.3.0 - 3/11/13 Grady Griffin
 
 * adding public paint, unpaint, and label methods

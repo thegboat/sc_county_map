@@ -94,7 +94,7 @@ Group Options
 
  **clickable** defaults to 'members'
 
-any group or groups separated by commas is valid. Use a '!' for group negation (i.e. '!members' would be not in members group). Use 'all' to denote just that.
+Any group or groups separated by commas is valid. Use 'all' to make all groups clickable.
 
 Color Options
 -
@@ -150,7 +150,7 @@ When set to true DOM tranversal is done only once and the result is stored on cr
 Custom Group Options
 -
 
-Add new groups by adding group and color prefixes.  The options
+Add custom groups by adding group and color prefixes to the name.  The options
 
 `{'group-best' : 'greenwood', 'color-best' : 'red,blue', clickable: 'best'}`
 
@@ -181,7 +181,15 @@ Calling upaint with no arguments unpaints all previously painted counties.
 
 Set the header text.  When an event is triggered, the header text is reset.
 
+**add_to** add_to(group_name, options)
 
+Method to create new group, change group members, colors.
+
+`$("#county_map").sc_county_map('add_to', 'new_group', {clickable : false, colors:'red,cyan', shapes:'horry,berkeley'})`
+
+**remove_from** remove_from(group_name, [counties])
+
+Remove the specified counties form the group. If no couty is specified all counties are removed
 
 
 [raphael]: http://raphaeljs.com/
