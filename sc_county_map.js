@@ -245,6 +245,7 @@ $.widget("ui.sc_county_map", {
   },
 
   _is_clickable : function(entity){
+    if(/(^|,)\s*all\s*($|,)/i.test(this.options.clickable)) return true
     var click_group = entity.click_group
     if(this.clickable[click_group] && this.groups[click_group][entity.name]) return true
     for(var group_name in this.clickable){

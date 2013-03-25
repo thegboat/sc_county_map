@@ -1,3 +1,6 @@
+#### 0.3.1 - 3/25/13 Grady Griffin
+* fixing all clickable
+
 #### 0.3.0 - 3/14/13 Grady Griffin
 
 * adding public add_to and remove_from methods
