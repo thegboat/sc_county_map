@@ -193,5 +193,5 @@ Remove the specified counties form the group. If no couty is specified all count
 
 
 [raphael]: http://raphaeljs.com/
-[see a live demo]: https://rawgithub.com/thegboat/examples/master/sc_county_map/example.html
+[see a live demo]: http://rawgithub.com/thegboat/examples/master/sc_county_map/example.html
 [Cufon]: http://cufon.shoqolate.com/generate/
